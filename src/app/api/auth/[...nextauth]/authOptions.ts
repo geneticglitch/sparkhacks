@@ -1,9 +1,8 @@
-import { User } from "next-auth";
-import NextAuth, { NextAuthOptions } from "next-auth"
-import { DefaultSession } from "next-auth"
-import Google from "next-auth/providers/google"
-import Credentials from "next-auth/providers/credentials"
-import { authenticate_user, handle_google_login } from "@/app/api/auth/[...nextauth]/server_actions"
+import { NextAuthOptions } from "next-auth";
+import { DefaultSession } from "next-auth";
+import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
+import { authenticate_user, handle_google_login } from "./server_actions";
 
 declare module "next-auth" {
   interface Session {
@@ -28,10 +27,10 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     Credentials({
-      name: 'Sign in',
+      name: "Sign in",
       credentials: {
-        email: { label: 'Email', type: 'email'},
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials || !credentials.email || !credentials.password) {
@@ -51,11 +50,11 @@ export const authOptions: NextAuthOptions = {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    })
+    }),
   ],
   callbacks: {
     async signIn({ account, profile, user }) {
-      if (account?.provider === 'google') {
+      if (account?.provider === "google") {
         const google_user = await handle_google_login(account, profile);
         if (google_user) {
           user.id = google_user.id;
@@ -63,9 +62,9 @@ export const authOptions: NextAuthOptions = {
           user.email = google_user.email;
           return true;
         }
-        return false; 
+        return false;
       }
-      return true; 
+      return true;
     },
     async jwt({ token, user }) {
       if (user) {
@@ -84,9 +83,6 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/auth/signin',
+    signIn: "/auth/signin",
   },
 };
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
